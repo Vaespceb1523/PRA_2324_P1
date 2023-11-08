@@ -1,5 +1,6 @@
+#include <iostream>
 #include <ostream>
-#include <exception>
+#include <stdexcept>
 #include "List.h"
 
 template <typename T>
@@ -9,7 +10,7 @@ class ListArray : public List<T> {
 	    T *arr;
 	    int max;
 	    int n;
-	    static const int MINSIZE;
+	    static const int MINSIZE = 2;
 	    void resize(int new_size){
 	    	T* arr2 = new T[new_size];
 		for(int i=0;i<n;i++){
@@ -20,34 +21,46 @@ class ListArray : public List<T> {
 		max = new_size;
 	    }
 	public:
-void insert(int pos,T e){
-	    	if(e>0 && e<size()){
-		   arr[pos]=e;
-		}else{
-		   std::cout <<"fuera de rango"<<std::endl;
-		}
+	    void insert(int pos,T e){
+	    	 if (pos < 0 || pos > n) {
+     		   throw std::out_of_range("fuera de rango");
+    		} else {
+        		for (int i = n; i >= pos+1; i--) {
+            			arr[i] = arr[i-1];
+        		}
+       			 arr[pos] = e;
+       			 n++;
+    			}
 	    }
-	    
 	     void append(T e){
-	    	arr[max]=e;	
+	    	if(n>=max){
+		  resize(n+1);
+		}
+		insert(n,e);
 	    }
 
-	      void prepend(T e){
-
-		arr[0]=e;
+	    void prepend(T e){
+		if(n>=max){
+                  resize(n+1);
+                }
+                insert(0,e);
             }
 
 	      T remove(int pos){
-	     	if(pos>0 && pos<size()-1){
-		   return arr[pos];
-		   delete[] arr;
+	     	T r = arr[pos];
+		if(pos>=0 && pos<n){
+		   for(int i=pos;i<n;i++){
+		   	arr[i] = arr[i+1];
+		   }
+		   n--;
 		}else{
 		   throw std::out_of_range("fuera de rango");
 		}
+		return r;
 	     }
 
 	      T get(int pos) const{
-	     	 if(pos>0 && pos<size()-1){
+	     	 if(pos>=0 && pos<n){
                    return arr[pos];
                  }else{
                    throw std::out_of_range("fuera de rango");
@@ -65,11 +78,12 @@ void insert(int pos,T e){
 	      }
 
 	      bool empty() const  {
-	      	if (n != 0){
+	      	if (n > 0){
 			return false;
-	        }
-		return true;
-	      }
+	        }else{
+		    return true;
+	         }
+		}
 
 	      int size() const {
 		  
@@ -81,8 +95,9 @@ void insert(int pos,T e){
 		if(MINSIZE!=2){
 		   throw std::invalid_argument("Está mal");
 		}
-
+		n = 0;
 		arr = new T[MINSIZE];
+		max = MINSIZE;
 	    }
 	    
 	    ~ListArray(){
@@ -90,7 +105,7 @@ void insert(int pos,T e){
 	    }
 	    
 	    T operator[](int pos){
-	    	if(pos>0 && pos<size()-1){
+	    	if(pos>=0 && pos<n){
                    return arr[pos];
                 }else{
                    throw std::out_of_range ("fuera de rango");
